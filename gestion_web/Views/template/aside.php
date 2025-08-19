@@ -49,7 +49,7 @@
                 <span>
                   <i class="ti ti-typography"></i>
                 </span>
-                <span class="hide-menu">Horario</span>
+                <span class="hide-menu">Turnos</span>
               </a>
             </li>
             <li class="sidebar-item">
@@ -57,7 +57,7 @@
                 <span>
                   <i class="ti ti-file-description"></i>
                 </span>
-                <span class="hide-menu">Asignar Horario</span>
+                <span class="hide-menu">Asignar Turnos</span>
               </a>
             </li>
             <li class="nav-small-cap">
@@ -138,7 +138,7 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                   <div class="message-body">
-                    <a href="#" class="d-flex align-items-center gap-2 dropdown-item">
+                    <a href="<?= BASE_URL; ?>Administracion/perfil" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-user fs-6"></i>
                       <p class="mb-0 fs-3">Mi perfil</p>
                     </a>
@@ -149,6 +149,9 @@
                     <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">My Task</p>
+                    </a> -->
+                    <!-- <a class="nav-link moon dark-layout" href="javascript:void(0)" style="display: flex;">
+                      <i class="ti ti-moon moon" style="display: flex;"></i>
                     </a> -->
                     <a href="<?= BASE_URL ?>Usuario/salir" class="btn btn-outline-primary mx-3 mt-2 d-block">Salir</a>
                   </div>

@@ -11,7 +11,28 @@ include "Views/template/aside.php";
 <!--  Header End -->
 <div class="container-fluid">
 
-    <h3>GESTION DE CARGOS</h3>
+    <div class="card bg-info-subtle shadow-none position-relative overflow-hidden mb-4">
+        <div class="card-body px-4 py-3">
+            <div class="row align-items-center">
+                <div class="col-9">
+                    <h4 class="fw-semibold mb-8">GESTION DE CARGOS DISPONIBLES</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a class="text-muted text-decoration-none" href="<?= BASE_URL; ?>Administracion/home">Inicio</a>
+                            </li>
+                            <li class="text-gray breadcrumb-item" aria-current="page">Gestion de cargos disponibles</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="col-3">
+                    <div class="text-center mb-n5">
+                        <img src="<?= BASE_URL ?>Assets/img/ChatBc.png" alt="modernize-img" class="img-fluid mb-n4">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="col-lg-12 d-flex align-items-stretch">
         <div class="card w-100">
@@ -65,7 +86,7 @@ include "Views/template/aside.php";
                                             <input id="cargo" name="cargo" type="text" class="form-control" placeholder="Ingrese cargo" required>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Footer -->
                                     <div class="modal-footer">
                                         <button type="button" class="btn bg-danger-subtle text-danger  waves-effect" data-bs-dismiss="modal">Cancelar</button>

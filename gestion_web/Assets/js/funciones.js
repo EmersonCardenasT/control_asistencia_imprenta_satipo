@@ -47,6 +47,17 @@ document.addEventListener("DOMContentLoaded", function () {
         { data: 'created_at' },
         { data: 'acciones' }
     ]);
+
+    // TURNOS
+    tblTurnos = initDataTable("#tblTurnos", BASE_URL + "Horario/listar_turnos", [
+        { data: 'id' },
+        { data: 'nombre' },
+        { data: 'hora_entrada' },
+        { data: 'hora_salida' },
+        { data: 'estado' },
+        { data: 'created_at' },
+        { data: 'acciones' }
+    ]);
 });
 
 function getLenguajeData() {

@@ -42,6 +42,16 @@ class Administracion extends Controller
     //     }
     // }
 
+    public function perfil()
+    {
+        $id_usuario = $_SESSION['id_usuario'];
+        if ($id_usuario) {
+            $this->views->getView($this, "perfil"); //, $data
+        }else {
+            header("Location: ". BASE_URL);
+        }
+    }
+
     public function home()
     {
         $id_usuario = $_SESSION['id_usuario'];
