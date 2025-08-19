@@ -47,8 +47,8 @@ class Administracion extends Controller
         $id_usuario = $_SESSION['id_usuario'];
         if ($id_usuario) {
             $this->views->getView($this, "home"); //, $data
-        }else{
-            header('Location: '. BASE_URL. 'Usuarios/salir');
+        }else {
+            header("Location: " . BASE_URL);
         }
     }
 

@@ -27,6 +27,13 @@ class EmpleadoModel extends Query
         $data = $this->selectAll($sql);
         return $data;
     }
+    
+    public function getEmpleado(int $id)
+    {
+        $sql = "SELECT e.*, c.nombre as cargo FROM empleados e INNER JOIN cargos c ON c.id = e.cargo_id WHERE e.id = $id";
+        $data = $this->select($sql); // Devuelve un array de resultados
+        return $data;
+    }
 
     public function putModificarEmpleado(string $nombre, string $apellido, string $dni, string $telefono, string $genero, string $fecha_nacimiento, string $direccion, string $email, string $cargo, string $estado, int $id)
     {

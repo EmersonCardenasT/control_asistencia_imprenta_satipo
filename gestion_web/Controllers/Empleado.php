@@ -15,6 +15,21 @@ class Empleado extends Controller
         if ($id_usuario) {
             $data['cargos'] = $this->model->getCargo();
             $this->views->getView($this, "index", $data);
+
+        } else {
+            header("Location: " . BASE_URL);
+        }
+    }
+
+    public function ver_empleado($id)
+    {
+        $id_usuario = $_SESSION['id_usuario'];
+        if ($id_usuario) {
+            $data['empleado'] = $this->model->getEmpleado($id);
+            $this->views->getView($this, "ver_empleado", $data);
+
+        } else {
+            header("Location: " . BASE_URL);
         }
     }
 
@@ -32,9 +47,9 @@ class Empleado extends Controller
                 <button class="btn btn-primary btn-action" onclick="btnEditarEmpleado(' . $data[$i]['id'] . ')" title="Editar">
                     <i class="ti ti-pencil"></i>
                 </button>
-                <button class="btn btn-info btn-action" onclick="btnVerEmpleado(' . $data[$i]['id'] . ')" title="Ver">
-                    <i class="ti ti-eye"></i>
-                </button>
+
+                <a class="btn btn-info btn-action" title="Ver" href="'. BASE_URL.'Empleado/ver_empleado/'.$data[$i]['id'].'" "><i class="ti ti-eye"></i></a>
+
                 <button class="btn btn-danger btn-action" onclick="btnEliminarEmpleado(' . $data[$i]['id'] . ')" title="Eliminar">
                     <i class="ti ti-trash"></i>
                 </button>
