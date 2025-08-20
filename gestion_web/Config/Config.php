@@ -1,5 +1,5 @@
 <?php
-const BASE_URL = "http://localhost:8080/Python/control_asistencia_imprenta_satipo/gestion_web/";
+const BASE_URL = "http://localhost/python/control_asistencia_imprenta_satipo/gestion_web/";
 const host = "localhost";
 const user = "root";
 const pass = "";

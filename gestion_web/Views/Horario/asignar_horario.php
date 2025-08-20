@@ -60,43 +60,59 @@ include "Views/template/aside.php";
                 <div class="col-md-12">
                     <div class="card mb-0">
                         <div class="card-body p-4">
-                            <h4 class="card-title">My Friends</h4>
-                            <p class="card-subtitle">The Power of Friendship</p>
+                            <h4 class="card-title">Seleccione los días de la semana</h4>
+                            <!-- <p class="card-subtitle">The Power of Friendship</p> -->
                             <div class="row gx-3 mt-4">
-                                <div class="col-3">
-                                    <img src="../assets/images/profile/user-2.jpg" class="rounded img-fluid" alt="art">
-                                </div>
-                                <div class="col-3">
-                                    <img src="../assets/images/profile/user-3.jpg" class="rounded img-fluid" alt="art">
-                                </div>
-                                <div class="col-3">
-                                    <img src="../assets/images/profile/user-4.jpg" class="rounded img-fluid" alt="art">
-                                </div>
-                                <div class="col-3">
-                                    <img src="../assets/images/profile/user-5.jpg" class="rounded img-fluid" alt="art">
-                                </div>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="0" value="0" autocomplete="off">
+                                            <div style="font-size:0.95em;">Lunes</div>
+                                        </div>
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="1" value="1" autocomplete="off">
+                                            <div style="font-size:0.95em;">Martes</div>
+                                        </div>
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="2"  value="2" autocomplete="off">
+                                            <div style="font-size:0.95em;">Miercoles</div>
+                                        </div>
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="3" value="3" autocomplete="off">
+                                            <div style="font-size:0.95em;">Jueves</div>
+                                        </div>
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="4" value="4" autocomplete="off">
+                                            <div style="font-size:0.95em;">Viernes</div>
+                                        </div>
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="5" value="5" autocomplete="off">
+                                            <div style="font-size:0.95em;">Sabado</div>
+                                        </div>
+                                        <div class="flex-fill text-center">
+                                            <input type="checkbox" name="dias[]" id="6" value="6" autocomplete="off">
+                                            <div style="font-size:0.95em;">Domingo</div>
+                                        </div>
+                                    </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
+kj
                 <div class="col-md-12 mt-4">
                     <div class="card">
                         <div class="card-body p-4">
-                            <h4 class="card-title">Favourite Artists</h4>
-                            <p class="card-subtitle">The Iconic Music of Prince</p>
+                            <h4 class="card-title">Seleccionar los turnos</h4>
+                            <!-- <p class="card-subtitle">The Iconic Music of Prince</p> -->
                             <div class="row gx-3 mt-4">
-                                <div class="col-3">
-                                    <img src="../assets/images/music/s1.jpg" class="rounded img-fluid" alt="art">
-                                </div>
-                                <div class="col-3">
-                                    <img src="../assets/images/music/s2.jpg" class="rounded img-fluid" alt="art">
-                                </div>
-                                <div class="col-3">
-                                    <img src="../assets/images/music/s3.jpg" class="rounded img-fluid" alt="art">
-                                </div>
-                                <div class="col-3">
-                                    <img src="../assets/images/music/s4.jpg" class="rounded img-fluid" alt="art">
+                                <div class="d-flex justify-content-between">
+                                    
+                                    <?php foreach ($data['turnos'] as $turno) { ?>
+                                        <div class="flex-fill text-center">
+                                            <input type="radio" name="turno" id="turno<?= $turno['id'] ?>" value="<?= $turno['id'] ?>" autocomplete="off">
+                                            <br><strong><?= $turno['nombre'] ?></strong><br>
+                                            <div style="font-size:0.95em;">Entrada: <?= $turno['hora_entrada'] ?> | Salida: <?= $turno['hora_salida'] ?></div>
+                                        </div>
+                                    <?php } ?>
                                 </div>
                             </div>
                         </div>
@@ -107,23 +123,26 @@ include "Views/template/aside.php";
 
         <div class="col-md-6 col-xl-3">
             <div class="card">
-                <div class="card-body p-4">
+                <div class="card-body p-3">
                     <h5 class="card-title fw-semibold">Seleccionar bloque</h5>
                     <!-- <p class="card-subtitle">Based on your preferences</p> -->
                     <div class="mt-4 card p-3 rounded shadow-none border">
-                        <div class="d-flex align-items-center">
-                            <div class="position-relative">
-                                TURNO TEMPRANO
-                            </div>
+                    <div class="d-flex align-items-center">
+                      <div class="position-relative">
+                        <img src="<?= BASE_URL; ?>Assets5trlk65/km-*" class="rounded" alt="album" width="97">
+                        <div class="card-img-overlay d-flex align-items-center justify-content-center">
+                          <button class="btn btn-primary rounded-circle round p-0">
+                            <i class="ti ti-player-play fs-5"></i>
+                          </button>
                         </div>
+                      </div>
+                      <div class="ms-3">
+                        <h6 class="mb-0 fs-5">Trending Songs</h6>
+                        <span class="d-block fs-3 my-1">Top trending hits, refres..</span>
+                        <small>Created by Gaana</small>
+                      </div>
                     </div>
-                    <div class="mt-4 card p-3 rounded shadow-none border">
-                        <div class="d-flex align-items-center">
-                            <div class="position-relative">
-                                TURNO TARDE
-                            </div>
-                        </div>
-                    </div>
+                  </div>
                     <div class="mt-4 card p-3 rounded shadow-none border">
                         <div class="d-flex align-items-center">
                             <div class="position-relative">

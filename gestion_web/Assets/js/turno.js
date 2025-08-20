@@ -29,7 +29,10 @@ function registrarTurno(e) {
         http.send(new FormData(frm));
         http.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
+                // console.log(this.responseText);
                 const res = JSON.parse(this.responseText);
+                // console.log(this.responseText);
+                
                 frm.reset();
                 $("#nuevo_turno").modal("hide");
                 alertas(res.msg, res.icono, res.titulo);

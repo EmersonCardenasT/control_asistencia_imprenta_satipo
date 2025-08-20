@@ -88,7 +88,8 @@ class Horario extends Controller
     {
         $id_usuario = $_SESSION['id_usuario'];
         if ($id_usuario) {
-            $this->views->getView($this, "asignar_horario");
+            $data['turnos'] = $this->model->getTurnos();
+            $this->views->getView($this, "asignar_horario", $data);
         }else {
             header("Location: " . BASE_URL);
         }
