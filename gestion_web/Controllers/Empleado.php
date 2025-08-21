@@ -25,6 +25,7 @@ class Empleado extends Controller
     {
         $id_usuario = $_SESSION['id_usuario'];
         if ($id_usuario) {
+            $data['turnos_empleado'] = $this->model->getEmpleadoTurno($id);
             $data['empleado'] = $this->model->getEmpleado($id);
             $this->views->getView($this, "ver_empleado", $data);
 
@@ -117,5 +118,12 @@ class Empleado extends Controller
         header('Content-Type: application/json'); // 👈 fuerza a devolver JSON
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         exit;
+    }
+
+    public function buscarEmpleado($dni)
+    {
+        $data = $this->model->getIdEmpleado($dni);
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        die();
     }
 }

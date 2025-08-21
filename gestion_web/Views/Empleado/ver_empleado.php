@@ -18,14 +18,6 @@ include "Views/template/aside.php";
                                                         $data['empleado']['nombre'] . ' ' . $data['empleado']['apellido']
                                                         : 'Empleado no encontrado';
                                                     ?></h4>
-                    <!-- <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a class="text-muted text-decoration-none" href="<?= BASE_URL; ?>Administracion/home">Inicio</a>
-                            </li>
-                            <li class="text-gray breadcrumb-item" aria-current="page">GESTION DE CARGOS DISPONIBLES</li>
-                        </ol>
-                    </nav> -->
                 </div>
             </div>
         </div>
@@ -136,6 +128,115 @@ include "Views/template/aside.php";
         </div>
     </div>
 
+
+    <div class="col-lg-12 d-flex align-items-stretch">
+        <div class="card w-100">
+            <div class="card-body p-4">
+                <!-- Título -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h3 class="text-center">Plan de turno de actividad laboral semanal del empleado</h3>
+                        <p class="text-center">Empleado: <strong><?= $data['empleado']['nombre'] . ' ' . $data['empleado']['apellido'] ?></strong></p>
+                        <!-- <p class="text-center">Date: 01/05/2025 to 07/05/2025</p> -->
+                    </div>
+                </div>
+
+                <!-- Tabla de turnos -->
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th>Time/Period</th>
+                                <th>Lunes</th>
+                                <th>Martes</th>
+                                <th>Miércoles</th>
+                                <th>Jueves</th>
+                                <th>Viernes</th>
+                                <th class="bg-info">Sábado</th>
+                                <th class="bg-danger">Domingo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $horas = [
+                                "05:00 AM - 06:00 AM",
+                                "06:00 AM - 07:00 AM",
+                                "07:00 AM - 08:00 AM",
+                                "08:00 AM - 09:00 AM",
+                                "09:00 AM - 10:00 AM",
+                                "10:00 AM - 11:00 AM",
+                                "11:00 AM - 12:00 PM",
+                                "12:00 PM - 01:00 PM",
+                                "01:00 PM - 02:00 PM",
+                                "02:00 PM - 03:00 PM",
+                                "03:00 PM - 04:00 PM",
+                                "04:00 PM - 05:00 PM",
+                                "05:00 PM - 06:00 PM",
+                                "06:00 PM - 07:00 PM",
+                                "07:00 PM - 08:00 PM",
+                                "08:00 PM - 09:00 PM",
+                                "09:00 PM - 10:00 PM",
+                                "10:00 PM - 11:00 PM",
+                                "11:00 PM - 12:00 AM"
+                            ];
+
+                            $diasSemana = [
+                                0 => "Lunes",
+                                1 => "Martes",
+                                2 => "Miércoles",
+                                3 => "Jueves",
+                                4 => "Viernes",
+                                5 => "Sábado",
+                                6 => "Domingo"
+                            ];
+
+                            $turnosPorDia = [];
+                            foreach ($data['turnos_empleado'] as $turno) {
+                                $turnosPorDia[$turno['dia_semana']][] = [
+                                    'entrada' => $turno['hora_entrada'],
+                                    'salida'  => $turno['hora_salida']
+                                ];
+                            }
+
+                            foreach ($horas as $hora) {
+                                echo "<tr>";
+                                echo "<td class='bg-light'>$hora</td>";
+
+                                // Separar inicio y fin del rango actual
+                                [$horaInicioStr, $horaFinStr] = explode(' - ', $hora);
+                                $horaInicio = DateTime::createFromFormat('h:i A', $horaInicioStr);
+
+                                for ($i = 0; $i <= 6; $i++) {
+                                    $asignado = false;
+                                
+                                    if (isset($turnosPorDia[$i])) {
+                                        foreach ($turnosPorDia[$i] as $rango) {
+                                            $entrada = DateTime::createFromFormat('H:i:s', $rango['entrada']);
+                                            $salida  = DateTime::createFromFormat('H:i:s', $rango['salida']);
+                                
+                                            if ($horaInicio >= $entrada && $horaInicio < $salida) {
+                                                $asignado = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                
+                                    if ($asignado) {
+                                        echo "<td class='bg-success text-white'>Asignado</td>";
+                                    } else {
+                                        echo "<td class='text-muted'>-</td>";
+                                    }
+                                }
+                                
+                                echo "</tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 

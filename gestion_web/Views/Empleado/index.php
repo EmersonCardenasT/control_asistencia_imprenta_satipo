@@ -49,6 +49,9 @@ include "Views/template/aside.php";
                                     <h6 class="fw-semibold mb-0">Empleado</h6>
                                 </th>
                                 <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">DNI</h6>
+                                </th>
+                                <th class="border-bottom-0">
                                     <h6 class="fw-semibold mb-0">Cargo</h6>
                                 </th>
                                 <th class="border-bottom-0">

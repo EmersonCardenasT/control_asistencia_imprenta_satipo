@@ -39,13 +39,26 @@ include "Views/template/aside.php";
             <!-- start Info Border with Icons -->
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Seleccionar al Empleado</h4>
+                    <h4 class="card-title">Buscar Empleado</h4>
                     <form>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control border-1 border-success" placeholder="Ingresar el DNI del Empleado" autocomplete="off" id="dni" name="dni" onkeyup="buscarEmpleado(event)">
+                                <span style="font-size:small">Presionar ENTER</span>
+                            </div>
+                            <div class="col-md-8">
+                            <!-- EMPLEADO -->
+                                <input type="hidden" id="id" name="id">
+                                <input type="text" id="empleado" name="empleado" class="form-control" disabled>
+                            </div>
+                        </div>
                         <div class="mb-3 has-success">
-                            <select class="form-select">
-                                <option value="">Male</option>
-                                <option value="">Female</option>
-                            </select>
+                            <!-- <input type="text" class="form-control"> -->
+                            <!-- <select name="empleado" id="empleado" class="form-select">
+                                <?php foreach ($data['empleados'] as $empleado) { ?>
+                                    <option value="<?= $empleado['id'] ?>"><?= $empleado['nombre'] ?></option>
+                                <?php } ?>
+                            </select> -->
                         </div>
                     </form>
                 </div>
@@ -59,45 +72,44 @@ include "Views/template/aside.php";
             <div class="row">
                 <div class="col-md-12">
                     <div class="card mb-0">
-                        <div class="card-body p-4">
+                        <div class="card-body p-4" id="contenedor-dias">
                             <h4 class="card-title">Seleccione los días de la semana</h4>
                             <!-- <p class="card-subtitle">The Power of Friendship</p> -->
                             <div class="row gx-3 mt-4">
-                                    <div class="d-flex justify-content-between">
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="0" value="0" autocomplete="off">
-                                            <div style="font-size:0.95em;">Lunes</div>
-                                        </div>
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="1" value="1" autocomplete="off">
-                                            <div style="font-size:0.95em;">Martes</div>
-                                        </div>
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="2"  value="2" autocomplete="off">
-                                            <div style="font-size:0.95em;">Miercoles</div>
-                                        </div>
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="3" value="3" autocomplete="off">
-                                            <div style="font-size:0.95em;">Jueves</div>
-                                        </div>
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="4" value="4" autocomplete="off">
-                                            <div style="font-size:0.95em;">Viernes</div>
-                                        </div>
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="5" value="5" autocomplete="off">
-                                            <div style="font-size:0.95em;">Sabado</div>
-                                        </div>
-                                        <div class="flex-fill text-center">
-                                            <input type="checkbox" name="dias[]" id="6" value="6" autocomplete="off">
-                                            <div style="font-size:0.95em;">Domingo</div>
-                                        </div>
+                                <div class="d-flex justify-content-between">
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="0" value="0" autocomplete="off">
+                                        <div style="font-size:0.95em;">Lunes</div>
                                     </div>
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="1" value="1" autocomplete="off">
+                                        <div style="font-size:0.95em;">Martes</div>
+                                    </div>
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="2" value="2" autocomplete="off">
+                                        <div style="font-size:0.95em;">Miercoles</div>
+                                    </div>
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="3" value="3" autocomplete="off">
+                                        <div style="font-size:0.95em;">Jueves</div>
+                                    </div>
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="4" value="4" autocomplete="off">
+                                        <div style="font-size:0.95em;">Viernes</div>
+                                    </div>
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="5" value="5" autocomplete="off">
+                                        <div style="font-size:0.95em;">Sabado</div>
+                                    </div>
+                                    <div class="flex-fill text-center">
+                                        <input type="checkbox" name="dias[]" id="6" value="6" autocomplete="off">
+                                        <div style="font-size:0.95em;">Domingo</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-kj
                 <div class="col-md-12 mt-4">
                     <div class="card">
                         <div class="card-body p-4">
@@ -105,7 +117,7 @@ kj
                             <!-- <p class="card-subtitle">The Iconic Music of Prince</p> -->
                             <div class="row gx-3 mt-4">
                                 <div class="d-flex justify-content-between">
-                                    
+
                                     <?php foreach ($data['turnos'] as $turno) { ?>
                                         <div class="flex-fill text-center">
                                             <input type="radio" name="turno" id="turno<?= $turno['id'] ?>" value="<?= $turno['id'] ?>" autocomplete="off">
@@ -124,30 +136,16 @@ kj
         <div class="col-md-6 col-xl-3">
             <div class="card">
                 <div class="card-body p-3">
-                    <h5 class="card-title fw-semibold">Seleccionar bloque</h5>
+                    <!-- <h5 class="card-title fw-semibold">Seleccionar bloque</h5> -->
                     <!-- <p class="card-subtitle">Based on your preferences</p> -->
-                    <div class="mt-4 card p-3 rounded shadow-none border">
-                    <div class="d-flex align-items-center">
-                      <div class="position-relative">
-                        <img src="<?= BASE_URL; ?>Assets5trlk65/km-*" class="rounded" alt="album" width="97">
-                        <div class="card-img-overlay d-flex align-items-center justify-content-center">
-                          <button class="btn btn-primary rounded-circle round p-0">
-                            <i class="ti ti-player-play fs-5"></i>
-                          </button>
-                        </div>
-                      </div>
-                      <div class="ms-3">
-                        <h6 class="mb-0 fs-5">Trending Songs</h6>
-                        <span class="d-block fs-3 my-1">Top trending hits, refres..</span>
-                        <small>Created by Gaana</small>
-                      </div>
-                    </div>
-                  </div>
-                    <div class="mt-4 card p-3 rounded shadow-none border">
+                    <div class="mt-12 card p-2 rounded shadow-none border">
                         <div class="d-flex align-items-center">
-                            <div class="position-relative">
-                                TURNO NOCHE
-                            </div>
+                            <img src="<?= BASE_URL; ?>Assets/img/blog-img5.jpg" class="rounded" alt="album" width="220">
+                        </div>
+                    </div>
+                    <div class="mt-4 p-2 card rounded shadow-none">
+                        <div class="flex-fill text-center">
+                            <button onclick="asignarHorario()" class="btn btn-danger">GUARDAR HORARIO</button>
                         </div>
                     </div>
                 </div>
@@ -157,6 +155,9 @@ kj
 
 </div>
 
+<script src="<?= BASE_URL ?>Assets/js/asignar_horario.js">
+
+</script>
 
 <?php
 include "Views/template/footer.php";
