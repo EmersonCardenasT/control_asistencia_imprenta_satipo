@@ -21,6 +21,22 @@ class EmpleadoModel extends Query
         parent::__construct();
     }
 
+    public function getIdEmpleado(string $dni)
+    {
+        $sql = "SELECT * FROM empleados WHERE dni = '$dni'";
+        $data = $this -> select($sql);
+        return $data;
+    }
+
+    public function getEmpleadoTurno(int $id)
+    {
+        $sql = "SELECT te.dia_semana, t.hora_entrada, t.hora_salida 
+        from turnos_empleado te inner join turnos t 
+        ON te.turno_id = t.id where empleado_id = $id;";
+        $data = $this->selectAll($sql);
+        return $data;
+    }
+
     public function getEmpleados()
     {
         $sql = "SELECT e.*, c.nombre as cargo FROM empleados e INNER JOIN cargos c ON c.id = e.cargo_id";

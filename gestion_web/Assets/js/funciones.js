@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 `;
             }
         },
+        { data: 'dni' },
         { data: 'cargo' },
         { data: 'estado' },
         { data: 'created_at' },

@@ -19,6 +19,18 @@ class Horario extends Controller
         }
     }
 
+    public function asignar_horario()
+    {
+        $id_usuario = $_SESSION['id_usuario'];
+        if ($id_usuario) {
+            $data['empleados'] = $this->model->getEmpleados();
+            $data['turnos'] = $this->model->getTurnos();
+            $this->views->getView($this, "asignar_horario", $data);
+        }else {
+            header("Location: " . BASE_URL);
+        }
+    }
+
     public function listar_turnos()
     {
         $data = $this->model->getTurnos();
@@ -84,16 +96,56 @@ class Horario extends Controller
         die();
     }
 
-    public function asignar_horario()
-    {
-        $id_usuario = $_SESSION['id_usuario'];
-        if ($id_usuario) {
-            $data['turnos'] = $this->model->getTurnos();
-            $this->views->getView($this, "asignar_horario", $data);
-        }else {
-            header("Location: " . BASE_URL);
-        }
-    }
+    // REGISTRAR NUEVO HORARIO PARA EL EMPLEADO
+     // Metodo para registrar el horario de un empleado y verificar si ya tiene horario asignado
+     public function registrarHorario()
+     {
+         $empleado = $_POST['id_empleado'];
+         $horario = $_POST['id_horario'];
+         $dias = $_POST['dias']; // esto es un array
+        //  $bloque = $_POST['bloque'];
+ 
+         if (empty($empleado) || empty($horario) || empty($dias)) {
+             $msg = array('msg' => 'Todos los campos son obligatorios', 'icono' => 'error', 'titulo' => 'Error');
+         } else {
+             $conflictos = [];
+ 
+             foreach ($dias as $dia) {
+                 // Verifica si el empleado ya tiene un horario asignado en ese día (sin importar cuál)
+                 $verificar = $this->model->verificarHorarioPorDia($empleado, $dia);
+                 if (!empty($verificar)) {
+                     $turnoNombre = $verificar['nombre_turno'] ?? 'desconocido';
+                     $conflictos[] = "$dia ($turnoNombre)";
+                 }
+             }
+ 
+             if (!empty($conflictos)) {
+                 $lista = implode(', ', $conflictos);
+                 $msg = array(
+                     'msg' => "El empleado ya tiene un horario asignado en los siguientes días: $lista",
+                     'icono' => 'danger',
+                     'titulo' => 'Advertencia'
+                 );
+             } else {
+                 $todoOk = true;
+                 foreach ($dias as $dia) {
+                     $res = $this->model->registrarHorarioEmpleado($empleado, $dia, $horario);
+                     if ($res !== "ok") {
+                         $todoOk = false;
+                         break;
+                     }
+                 }
+                 if ($todoOk) {
+                     $msg = array('msg' => 'Horario asignado con éxito', 'icono' => 'success', 'titulo' => 'Éxito');
+                 } else {
+                     $msg = array('msg' => 'Error al asignar el Horario', 'icono' => 'error', 'titulo' => 'Error');
+                 }
+             }
+         }
+ 
+         echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+         die();
+     }
 
 }
 
