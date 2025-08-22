@@ -2,6 +2,22 @@ import customtkinter as ctk
 import os
 from PIL import Image
 import tkinter.messagebox as mbox  # al inicio del archivo
+from database.connection import create_connection
+from utils.empleados_utils import obtener_empleados
+from utils.empleados_table import render_tabla_empleados
+
+# Crear conexión
+conn = create_connection()
+
+# Ejemplo: ejecutar un query
+# if conn:
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT * FROM empleados")
+#     resultados = cursor.fetchall()
+#     for fila in resultados:
+#         print(fila)
+#     cursor.close()
+#     conn.close()
 
 
 class App(ctk.CTk):
@@ -10,8 +26,8 @@ class App(ctk.CTk):
 
         self.title("Sistema de Asistencia - Imprenta XYZ")
         # --- Centrar ventana ---
-        ancho_ventana = 1000
-        alto_ventana = 650
+        ancho_ventana = 1150
+        alto_ventana = 700
         x_ventana = int((self.winfo_screenwidth() / 2) - (ancho_ventana / 2))
         y_ventana = int((self.winfo_screenheight() / 2) - (alto_ventana / 2))
         self.geometry(f"{ancho_ventana}x{alto_ventana}+{x_ventana}+{y_ventana}")
@@ -192,9 +208,46 @@ class App(ctk.CTk):
         lbl2 = ctk.CTkLabel(self.second_frame, text="📊 Aquí irán los reportes", font=ctk.CTkFont(size=18))
         lbl2.pack(pady=50)
 
+
+        # --------- EMPLEADOS FRAME ---------
         self.third_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.third_frame.grid_columnconfigure(0, weight=1)
+
         lbl3 = ctk.CTkLabel(self.third_frame, text="👥 Administración de empleados", font=ctk.CTkFont(size=18))
-        lbl3.pack(pady=50)
+        lbl3.pack(pady=20)
+
+        # Botón para abrir formulario de registro
+        btn_add_employee = ctk.CTkButton(
+            self.third_frame,
+            text="➕ Registrar Empleado",
+            fg_color="green",
+            hover_color="darkgreen",
+            text_color="white",
+            command=self.open_register_employee_window
+        )
+        btn_add_employee.pack(pady=10)
+
+        # --------- BUSCADOR ---------
+        self.search_var = ctk.StringVar()
+        search_entry = ctk.CTkEntry(self.third_frame, textvariable=self.search_var, placeholder_text="Buscar empleado...")
+        search_entry.pack(pady=10)
+
+        btn_search = ctk.CTkButton(self.third_frame, text="🔍 Buscar", width=100, command=lambda: self.cargar_tabla_empleados(1))
+        btn_search.pack(pady=5)
+
+        # --------- TABLA ---------
+        self.table_frame = ctk.CTkFrame(self.third_frame)
+        self.table_frame.pack(pady=10, padx=40, fill="x")  # <<--- padding lateral
+
+
+        # --------- PAGINACIÓN ---------
+        self.pagination_frame = ctk.CTkFrame(self.third_frame, fg_color="transparent")
+        self.pagination_frame.pack(pady=10)
+
+        self.pagina_actual = 1
+        self.cargar_tabla_empleados(1)
+
+        # FIN DEL FRAME DE EMPLEADOS
 
         # select default frame
         self.select_frame_by_name("home")
@@ -217,6 +270,46 @@ class App(ctk.CTk):
             self.third_frame.grid(row=1, column=1, sticky="nsew")
         else:
             self.third_frame.grid_forget()
+
+    def open_register_employee_window(self):
+        # Crear ventana emergente
+        register_win = ctk.CTkToplevel(self)
+        register_win.title("Registrar Nuevo Empleado")
+        register_win.geometry("400x400")
+        register_win.grab_set()  # Bloquea la ventana principal hasta cerrar esta
+
+        # Título
+        lbl_title = ctk.CTkLabel(register_win, text="Formulario de Registro", font=ctk.CTkFont(size=16, weight="bold"))
+        lbl_title.pack(pady=20)
+
+        # Campos de formulario
+        entry_name = ctk.CTkEntry(register_win, placeholder_text="Nombre completo")
+        entry_name.pack(pady=10, padx=20)
+
+        entry_dni = ctk.CTkEntry(register_win, placeholder_text="DNI")
+        entry_dni.pack(pady=10, padx=20)
+
+        entry_cargo = ctk.CTkEntry(register_win, placeholder_text="Cargo")
+        entry_cargo.pack(pady=10, padx=20)
+
+        entry_email = ctk.CTkEntry(register_win, placeholder_text="Correo electrónico")
+        entry_email.pack(pady=10, padx=20)
+
+        # Botones
+        def guardar_empleado():
+            nombre = entry_name.get()
+            dni = entry_dni.get()
+            cargo = entry_cargo.get()
+            email = entry_email.get()
+            print(f"Empleado registrado: {nombre}, {dni}, {cargo}, {email}")
+            register_win.destroy()  # cerrar ventana después de guardar
+
+        btn_save = ctk.CTkButton(register_win, text="Guardar", fg_color="blue", command=guardar_empleado)
+        btn_save.pack(pady=15)
+
+        btn_cancel = ctk.CTkButton(register_win, text="Cancelar", fg_color="red", command=register_win.destroy)
+        btn_cancel.pack()
+
 
     def confirm_logout(self):
         import tkinter.messagebox as mbox
@@ -265,6 +358,74 @@ class App(ctk.CTk):
 
     def change_appearance_mode_event(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
+
+    def cargar_tabla_empleados(self, pagina):
+        # Limpiar tabla anterior
+        for widget in self.table_frame.winfo_children():
+            widget.destroy()
+
+        # Obtener empleados filtrados
+        filtro = self.search_var.get()
+        empleados, total_paginas = obtener_empleados(pagina=pagina, por_pagina=10, filtro=filtro)
+
+        # Encabezados
+        encabezados = ["ID", "Nombre", "DNI", "Cargo", "Email", "Acciones"]
+        for col, text in enumerate(encabezados):
+            lbl = ctk.CTkLabel(self.table_frame, text=text, font=ctk.CTkFont(weight="bold"))
+            lbl.grid(row=0, column=col, padx=10, pady=5, sticky="w")
+
+        # Filas
+        for fila, emp in enumerate(empleados, start=1):
+            ctk.CTkLabel(self.table_frame, text=emp["id"]).grid(row=fila, column=0, padx=10, pady=2, sticky="w")
+            ctk.CTkLabel(self.table_frame, text=emp["nombre"]).grid(row=fila, column=1, padx=10, pady=2, sticky="w")
+            ctk.CTkLabel(self.table_frame, text=emp["dni"]).grid(row=fila, column=2, padx=10, pady=2, sticky="w")
+            ctk.CTkLabel(self.table_frame, text=emp["cargo"]).grid(row=fila, column=3, padx=10, pady=2, sticky="w")
+            ctk.CTkLabel(self.table_frame, text=emp["email"]).grid(row=fila, column=4, padx=10, pady=2, sticky="w")
+
+            # -------- BOTONES DE ACCIONES --------
+            btn_frame = ctk.CTkFrame(self.table_frame, fg_color="transparent")
+            btn_frame.grid(row=fila, column=5, padx=10, pady=2)
+
+            btn_update = ctk.CTkButton(btn_frame, text="✏️", width=30, fg_color="blue",
+                                    hover_color="darkblue", command=lambda e=emp: self.actualizar_empleado(e))
+            btn_update.pack(side="left", padx=2)
+
+            btn_delete = ctk.CTkButton(btn_frame, text="🗑️", width=30, fg_color="red",
+                                    hover_color="darkred", command=lambda e=emp: self.eliminar_empleado(e))
+            btn_delete.pack(side="left", padx=2)
+
+            btn_photo = ctk.CTkButton(btn_frame, text="📸", width=30, fg_color="orange",
+                                    hover_color="darkorange", command=lambda e=emp: self.actualizar_foto(e))
+            btn_photo.pack(side="left", padx=2)
+
+        # -------- PAGINACIÓN --------
+        for widget in self.pagination_frame.winfo_children():
+            widget.destroy()
+
+        if pagina > 1:
+            btn_prev = ctk.CTkButton(self.pagination_frame, text="⬅️ Anterior",
+                                    command=lambda: self.cargar_tabla_empleados(pagina - 1))
+            btn_prev.pack(side="left", padx=5)
+
+        lbl_page = ctk.CTkLabel(self.pagination_frame, text=f"Página {pagina} de {total_paginas}")
+        lbl_page.pack(side="left", padx=10)
+
+        if pagina < total_paginas:
+            btn_next = ctk.CTkButton(self.pagination_frame, text="Siguiente ➡️",
+                                    command=lambda: self.cargar_tabla_empleados(pagina + 1))
+            btn_next.pack(side="left", padx=5)
+
+        # Guardar página actual
+        self.pagina_actual = pagina
+
+    def actualizar_empleado(self, empleado):
+        print(f"✏️ Actualizar empleado: {empleado['nombre']}")
+
+    def eliminar_empleado(self, empleado):
+        print(f"🗑️ Eliminar empleado: {empleado['nombre']}")
+
+    def actualizar_foto(self, empleado):
+        print(f"📸 Actualizar foto de: {empleado['nombre']}")
 
 
 if __name__ == "__main__":
