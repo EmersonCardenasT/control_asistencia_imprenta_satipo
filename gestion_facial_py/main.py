@@ -1,19 +1,31 @@
 import customtkinter as ctk
 import os
 from PIL import Image
+import tkinter.messagebox as mbox  # al inicio del archivo
+
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         self.title("Sistema de Asistencia - Imprenta XYZ")
-        self.geometry("900x550")
+        # --- Centrar ventana ---
+        ancho_ventana = 1000
+        alto_ventana = 650
+        x_ventana = int((self.winfo_screenwidth() / 2) - (ancho_ventana / 2))
+        y_ventana = int((self.winfo_screenheight() / 2) - (alto_ventana / 2))
+        self.geometry(f"{ancho_ventana}x{alto_ventana}+{x_ventana}+{y_ventana}")
+
 
         # --------- LOGIN FRAME ---------
         self.login_frame = ctk.CTkFrame(self, corner_radius=10)
         self.login_frame.pack(expand=True)
 
-        lbl_title = ctk.CTkLabel(self.login_frame, text="Iniciar Sesión", font=ctk.CTkFont(size=20, weight="bold"))
+        lbl_title = ctk.CTkLabel(
+            self.login_frame,
+            text="Iniciar Sesión",
+            font=ctk.CTkFont(size=20, weight="bold")
+        )
         lbl_title.pack(pady=(30, 10))
 
         self.username_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Usuario")
@@ -30,9 +42,12 @@ class App(ctk.CTk):
 
         # --------- MAIN APP (Oculto hasta login) ---------
         self.navigation_frame = None
+        self.navbar_frame = None
         self.home_frame = None
         self.second_frame = None
         self.third_frame = None
+
+        self.logged_user = None  # Guardar el usuario logueado
 
     # --------- VALIDACIÓN LOGIN ---------
     def check_login(self):
@@ -40,6 +55,7 @@ class App(ctk.CTk):
         password = self.password_entry.get()
 
         if user == "admin" and password == "1234":  # 🔑 Aquí pones tu validación real
+            self.logged_user = user
             self.login_frame.pack_forget()  # Ocultar login
             self.create_main_app()          # Mostrar la app principal
         else:
@@ -49,6 +65,8 @@ class App(ctk.CTk):
         # Ocultar frames principales
         if self.navigation_frame:
             self.navigation_frame.grid_forget()
+        if self.navbar_frame:
+            self.navbar_frame.grid_forget()
         if self.home_frame:
             self.home_frame.grid_forget()
         if self.second_frame:
@@ -64,11 +82,10 @@ class App(ctk.CTk):
         self.password_entry.delete(0, "end")
         self.login_msg.configure(text="")
 
-
     # --------- APP PRINCIPAL ---------
     def create_main_app(self):
-        # set grid layout 1x2
-        self.grid_rowconfigure(0, weight=1)
+        # set grid layout 2x2 → navbar arriba, sidebar a la izquierda
+        self.grid_rowconfigure(1, weight=1)  # contenido principal
         self.grid_columnconfigure(1, weight=1)
 
         # carga de imágenes
@@ -82,55 +99,86 @@ class App(ctk.CTk):
                                        dark_image=Image.open(os.path.join(image_path, "chat_light.png")), size=(20, 20))
         self.add_user_image = ctk.CTkImage(light_image=Image.open(os.path.join(image_path, "add_user_dark.png")),
                                            dark_image=Image.open(os.path.join(image_path, "add_user_light.png")), size=(20, 20))
+        self.user_icon = ctk.CTkImage(Image.open(os.path.join(image_path, "add_user_dark.png")), size=(20, 20))
+        # Cargar el icono de apagar
+        self.logout_icon = ctk.CTkImage(
+            Image.open(os.path.join(image_path, "encendido.png")), 
+            size=(23, 23)
+        )
+        # --------- NAVBAR SUPERIOR ---------
+        self.navbar_frame = ctk.CTkFrame(self, height=50, corner_radius=0)
+        self.navbar_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        self.navbar_frame.grid_columnconfigure(0, weight=1)  # espacio flexible a la izquierda
 
-        # create navigation frame
-        self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
-        self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(4, weight=1)
-
-        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="  Sistema Asistencia", image=self.logo_image,
-                                                   compound="left", font=ctk.CTkFont(size=15, weight="bold"))
-        self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
-
-        self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Inicio",
-                                         fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                         image=self.home_image, anchor="w", command=self.home_button_event)
-        self.home_button.grid(row=1, column=0, sticky="ew")
-
-        self.frame_2_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Reportes",
-                                            fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                            image=self.chat_image, anchor="w", command=self.frame_2_button_event)
-        self.frame_2_button.grid(row=2, column=0, sticky="ew")
-
-        self.frame_3_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Empleados",
-                                            fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                            image=self.add_user_image, anchor="w", command=self.frame_3_button_event)
-        self.frame_3_button.grid(row=3, column=0, sticky="ew")
-
-        # OptionMenu de modo oscuro
+        # Selector de modo claro/oscuro
         self.appearance_mode_menu = ctk.CTkOptionMenu(
-            self.navigation_frame,
+            self.navbar_frame,
             values=["Light", "Dark", "System"],
             command=self.change_appearance_mode_event
         )
-        self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=(20, 10), sticky="s")  # 👈 ahora sí aparece
+        self.appearance_mode_menu.grid(row=0, column=1, padx=10, pady=10, sticky="e")
 
-        # Botón de cerrar sesión
+        # Usuario logueado
+        self.user_label = ctk.CTkLabel(
+            self.navbar_frame,
+            text=f"{self.logged_user}",
+            image=self.user_icon,
+            compound="left",
+            font=ctk.CTkFont(size=13, weight="bold")
+        )
+        self.user_label.grid(row=0, column=2, padx=10, pady=10, sticky="e")
+
+        # Botón con el icono y el comando correcto
         self.logout_button = ctk.CTkButton(
-            self.navigation_frame,
-            text="Cerrar Sesión",
-            fg_color="red",
+            self.navbar_frame,
+            text="",
+            image=self.logout_icon,
+            width=40,
+            fg_color="transparent",
             hover_color="darkred",
             text_color="white",
             corner_radius=8,
-            command=self.logout
+            command=self.confirm_logout   # 👈 aquí va la función de confirmar logout
         )
-        self.logout_button.grid(row=7, column=0, padx=20, pady=(0, 20), sticky="s")
 
+        self.logout_button.grid(row=0, column=3, padx=20, pady=10, sticky="e")
 
+        # --------- SIDEBAR (ASIDE) ---------
+        self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.navigation_frame.grid(row=1, column=0, sticky="nsew")
+        self.navigation_frame.grid_rowconfigure(5, weight=1)
 
+        self.navigation_frame_label = ctk.CTkLabel(
+            self.navigation_frame,
+            text="  Sistema Asistencia",
+            image=self.logo_image,
+            compound="left",
+            font=ctk.CTkFont(size=15, weight="bold")
+        )
+        self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
 
-        # create home frame
+        self.home_button = ctk.CTkButton(
+            self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Inicio",
+            fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+            image=self.home_image, anchor="w", command=self.home_button_event
+        )
+        self.home_button.grid(row=1, column=0, sticky="ew")
+
+        self.frame_2_button = ctk.CTkButton(
+            self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Reportes",
+            fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+            image=self.chat_image, anchor="w", command=self.frame_2_button_event
+        )
+        self.frame_2_button.grid(row=2, column=0, sticky="ew")
+
+        self.frame_3_button = ctk.CTkButton(
+            self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Empleados",
+            fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+            image=self.add_user_image, anchor="w", command=self.frame_3_button_event
+        )
+        self.frame_3_button.grid(row=3, column=0, sticky="ew")
+
+        # --------- FRAMES DE CONTENIDO ---------
         self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid_columnconfigure(0, weight=1)
 
@@ -140,12 +188,10 @@ class App(ctk.CTk):
         self.home_frame_button_1 = ctk.CTkButton(self.home_frame, text="Reconocimiento Facial", image=self.image_icon_image)
         self.home_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
 
-        # create second frame
         self.second_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         lbl2 = ctk.CTkLabel(self.second_frame, text="📊 Aquí irán los reportes", font=ctk.CTkFont(size=18))
         lbl2.pack(pady=50)
 
-        # create third frame
         self.third_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         lbl3 = ctk.CTkLabel(self.third_frame, text="👥 Administración de empleados", font=ctk.CTkFont(size=18))
         lbl3.pack(pady=50)
@@ -155,24 +201,58 @@ class App(ctk.CTk):
 
     # --------- FRAMES NAV ---------
     def select_frame_by_name(self, name):
-        # set button color for selected button
         self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
         self.frame_2_button.configure(fg_color=("gray75", "gray25") if name == "frame_2" else "transparent")
         self.frame_3_button.configure(fg_color=("gray75", "gray25") if name == "frame_3" else "transparent")
 
-        # show selected frame
         if name == "home":
-            self.home_frame.grid(row=0, column=1, sticky="nsew")
+            self.home_frame.grid(row=1, column=1, sticky="nsew")
         else:
             self.home_frame.grid_forget()
         if name == "frame_2":
-            self.second_frame.grid(row=0, column=1, sticky="nsew")
+            self.second_frame.grid(row=1, column=1, sticky="nsew")
         else:
             self.second_frame.grid_forget()
         if name == "frame_3":
-            self.third_frame.grid(row=0, column=1, sticky="nsew")
+            self.third_frame.grid(row=1, column=1, sticky="nsew")
         else:
             self.third_frame.grid_forget()
+
+    def confirm_logout(self):
+        import tkinter.messagebox as mbox
+        respuesta = mbox.askokcancel("Cerrar Sesión", "¿Seguro que quieres cerrar sesión?")
+        if respuesta:  
+            self.logout()   # ✅ Aceptar → cerrar sesión
+        else:
+            pass            # ❌ Cancelar → no hacer nada
+
+    def confirm_logout(self):
+        # Crear ventana emergente
+        dialog = ctk.CTkToplevel(self)
+        dialog.title("Cerrar Sesión")
+        dialog.geometry("300x150")
+        dialog.grab_set()  # Bloquear interacción con ventana principal
+
+        # Centrar el diálogo en pantalla
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (300 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (150 // 2)
+        dialog.geometry(f"350x150+{x}+{y}")
+
+        # Texto del mensaje
+        lbl = ctk.CTkLabel(dialog, text="¿Seguro que quieres cerrar sesión?", font=ctk.CTkFont(size=14))
+        lbl.pack(pady=20)
+
+        # Botones Aceptar / Cancelar
+        btn_frame = ctk.CTkFrame(dialog, fg_color="transparent")
+        btn_frame.pack(pady=10)
+
+        btn_ok = ctk.CTkButton(btn_frame, text="Aceptar", fg_color="red", hover_color="darkred",
+                            command=lambda: (dialog.destroy(), self.logout()))
+        btn_ok.grid(row=0, column=0, padx=10)
+
+        btn_cancel = ctk.CTkButton(btn_frame, text="Cancelar", command=dialog.destroy)
+        btn_cancel.grid(row=0, column=1, padx=10)
 
     def home_button_event(self):
         self.select_frame_by_name("home")
@@ -188,7 +268,7 @@ class App(ctk.CTk):
 
 
 if __name__ == "__main__":
-    ctk.set_appearance_mode("light")  # puedes poner "dark"
-    ctk.set_default_color_theme("blue")  # o "green", "dark-blue"
+    ctk.set_appearance_mode("light")
+    ctk.set_default_color_theme("blue")
     app = App()
     app.mainloop()
