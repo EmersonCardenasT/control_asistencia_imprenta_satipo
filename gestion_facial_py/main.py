@@ -9,6 +9,24 @@ from utils.empleados_table import render_tabla_empleados
 # Crear conexión
 conn = create_connection()
 
+def configurar_combobox_cargo(combobox):
+    conexion = create_connection()
+    if conexion:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT id, nombre FROM cargo")
+        resultados = cursor.fetchall()
+        conexion.close()
+
+        # Guardamos {nombre: id} para poder recuperarlo luego
+        cargos_dict = {fila[1]: fila[0] for fila in resultados}
+
+        # Asignar nombres al combobox
+        combobox.configure(values=list(cargos_dict.keys()))
+        if cargos_dict:
+            combobox.set(list(cargos_dict.keys())[0])  # Seleccionar el primero
+        return cargos_dict  # lo devolvemos para usarlo más tarde
+    return {}
+
 # Ejemplo: ejecutar un query
 # if conn:
 #     cursor = conn.cursor()
@@ -181,9 +199,9 @@ class App(ctk.CTk):
         self.home_button.grid(row=1, column=0, sticky="ew")
 
         self.frame_2_button = ctk.CTkButton(
-            self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Reportes",
+            self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Registrar Empleado",
             fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-            image=self.chat_image, anchor="w", command=self.frame_2_button_event
+            image=self.add_user_image, anchor="w", command=self.frame_2_button_event
         )
         self.frame_2_button.grid(row=2, column=0, sticky="ew")
 
@@ -198,16 +216,131 @@ class App(ctk.CTk):
         self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid_columnconfigure(0, weight=1)
 
+         # --------- DASHBOARD WIDGETS ---------
+        dashboard_frame = ctk.CTkFrame(self.home_frame, fg_color="#f5f5f5", corner_radius=12)
+        dashboard_frame.grid(row=0, column=0, padx=40, pady=(30, 10), sticky="ew")
+        dashboard_frame.grid_columnconfigure((0,1,2,3), weight=1)
+
+        # Widget: Empleados registrados
+        widget_emp = ctk.CTkFrame(dashboard_frame, fg_color="#1976d2", corner_radius=10)
+        widget_emp.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        ctk.CTkLabel(widget_emp, text="👥", font=ctk.CTkFont(size=32), text_color="#fff").pack(pady=(10,0))
+        ctk.CTkLabel(widget_emp, text="Empleados", font=ctk.CTkFont(size=14, weight="bold"), text_color="#fff").pack()
+        ctk.CTkLabel(widget_emp, text="25", font=ctk.CTkFont(size=22, weight="bold"), text_color="#fff").pack(pady=(0,10))
+
+        # Widget: Asistencias registradas
+        widget_asist = ctk.CTkFrame(dashboard_frame, fg_color="#388e3c", corner_radius=10)
+        widget_asist.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        ctk.CTkLabel(widget_asist, text="✅", font=ctk.CTkFont(size=32), text_color="#fff").pack(pady=(10,0))
+        ctk.CTkLabel(widget_asist, text="Asistencias", font=ctk.CTkFont(size=14, weight="bold"), text_color="#fff").pack()
+        ctk.CTkLabel(widget_asist, text="120", font=ctk.CTkFont(size=22, weight="bold"), text_color="#fff").pack(pady=(0,10))
+
+        # Widget: Tardanzas
+        widget_tarde = ctk.CTkFrame(dashboard_frame, fg_color="#fbc02d", corner_radius=10)
+        widget_tarde.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+        ctk.CTkLabel(widget_tarde, text="⏰", font=ctk.CTkFont(size=32), text_color="#fff").pack(pady=(10,0))
+        ctk.CTkLabel(widget_tarde, text="Tardanzas", font=ctk.CTkFont(size=14, weight="bold"), text_color="#fff").pack()
+        ctk.CTkLabel(widget_tarde, text="8", font=ctk.CTkFont(size=22, weight="bold"), text_color="#fff").pack(pady=(0,10))
+
+        # Widget: Faltas
+        widget_falta = ctk.CTkFrame(dashboard_frame, fg_color="#d32f2f", corner_radius=10)
+        widget_falta.grid(row=0, column=3, padx=10, pady=10, sticky="nsew")
+        ctk.CTkLabel(widget_falta, text="❌", font=ctk.CTkFont(size=32), text_color="#fff").pack(pady=(10,0))
+        ctk.CTkLabel(widget_falta, text="Faltas", font=ctk.CTkFont(size=14, weight="bold"), text_color="#fff").pack()
+        ctk.CTkLabel(widget_falta, text="3", font=ctk.CTkFont(size=22, weight="bold"), text_color="#fff").pack(pady=(0,10))
+
+        # Imagen decorativa debajo del dashboard
         self.home_frame_large_image_label = ctk.CTkLabel(self.home_frame, text="", image=self.large_test_image)
-        self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
+        self.home_frame_large_image_label.grid(row=1, column=0, padx=20, pady=10)
 
-        self.home_frame_button_1 = ctk.CTkButton(self.home_frame, text="Reconocimiento Facial", image=self.image_icon_image)
-        self.home_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
+        # self.home_frame_button_1 = ctk.CTkButton(self.home_frame, text="Reconocimiento Facial", image=self.image_icon_image)
+        # self.home_frame_button_1.grid(row=2, column=0, padx=20, pady=10)
 
+        # self.home_frame_large_image_label = ctk.CTkLabel(self.home_frame, text="", image=self.large_test_image)
+        # self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
+
+        # self.home_frame_button_1 = ctk.CTkButton(self.home_frame, text="Reconocimiento Facial", image=self.image_icon_image)
+        # self.home_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
+
+        # --------- FRAME REGISTRAR EMPLEADO ---------
         self.second_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        lbl2 = ctk.CTkLabel(self.second_frame, text="📊 Aquí irán los reportes", font=ctk.CTkFont(size=18))
-        lbl2.pack(pady=50)
+        self.second_frame.grid_columnconfigure(0, weight=1)
+        
+        lbl2 = ctk.CTkLabel(self.second_frame, text="📝 Registrar Empleado", font=ctk.CTkFont(size=18, weight="bold"))
+        lbl2.pack(pady=20)
 
+        # Formulario de registro estilo DNI
+        form_frame = ctk.CTkFrame(self.second_frame, fg_color="#f5f5f5", corner_radius=12)
+        form_frame.pack(padx=40, pady=10, fill="x")
+
+        campos = [
+            ("Nombre(s)", "nombre"),
+            ("Apellido(s)", "apellido"),
+            ("DNI", "dni"),
+            ("Teléfono", "telefono"),
+            # Los siguientes tres irán juntos en una sola fila
+            ("Género", "genero"),
+            ("Fecha de Nacimiento", "fecha_nacimiento"),
+            ("Cargo", "cargo_id"),
+            ("Dirección", "direccion"),
+            ("Email", "email"),
+        ]
+        self.registro_vars = {}
+
+        # Inputs de 2 en 2, excepto la fila especial de 3 campos
+        i = 0
+        while i < len(campos):
+            # Si estamos en la fila de género, fecha_nacimiento y cargo
+            if campos[i][1] == "genero":
+                row_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
+                row_frame.pack(fill="x", padx=10)
+                for j in range(3):
+                    label, key = campos[i + j]
+                    col_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
+                    col_frame.pack(side="left", expand=True, fill="x", padx=5)
+                    lbl = ctk.CTkLabel(col_frame, text=label, anchor="w")
+                    lbl.pack(pady=(10,0), fill="x")
+
+                    if key == "cargo_id":  # 👈 aquí hacemos el cambio
+                        entry = ctk.CTkComboBox(col_frame)
+                        cargos_dict = configurar_combobox_cargo(entry)  # llenar desde la BD
+                        self.cargos_dict = cargos_dict  # guardamos el dict para consultar luego
+                    elif key == "genero":
+                        entry = ctk.CTkComboBox(col_frame, values=["Masculino", "Femenino", "Otro"])
+                    else:
+                        entry = ctk.CTkEntry(col_frame, placeholder_text=label)
+
+                    entry.pack(pady=(0,5), fill="x")
+                    self.registro_vars[key] = entry
+                i += 3
+            else:
+                row_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
+                row_frame.pack(fill="x", padx=10)
+                for j in range(2):
+                    if i + j < len(campos) and campos[i + j][1] != "genero":
+                        label, key = campos[i + j]
+                        col_frame = ctk.CTkFrame(row_frame, fg_color="transparent")
+                        col_frame.pack(side="left", expand=True, fill="x", padx=5)
+                        lbl = ctk.CTkLabel(col_frame, text=label, anchor="w")
+                        lbl.pack(pady=(10,0), fill="x")
+                        entry = ctk.CTkEntry(col_frame, placeholder_text=label)
+                        entry.pack(pady=(0,5), fill="x")
+                        self.registro_vars[key] = entry
+                i += 2
+
+        # Botón de Registro Facial
+        btn_facial = ctk.CTkButton(
+            form_frame,
+            text="" \
+            " Facial",
+            fg_color="#1976d2",
+            hover_color="#1565c0",
+            text_color="white",
+            corner_radius=8,
+            command=self.registro_facial_event
+        )
+        btn_facial.pack(pady=30)
+        # FIN DE FRAME REGISTRO A EMPLEADO
 
         # --------- EMPLEADOS FRAME ---------
         self.third_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -226,7 +359,7 @@ class App(ctk.CTk):
             command=self.open_register_employee_window
         )
         btn_add_employee.pack(pady=10)
-
+ 
         # --------- BUSCADOR ---------
         self.search_var = ctk.StringVar()
         search_entry = ctk.CTkEntry(self.third_frame, textvariable=self.search_var, placeholder_text="Buscar empleado...")
@@ -309,7 +442,6 @@ class App(ctk.CTk):
 
         btn_cancel = ctk.CTkButton(register_win, text="Cancelar", fg_color="red", command=register_win.destroy)
         btn_cancel.pack()
-
 
     def confirm_logout(self):
         import tkinter.messagebox as mbox
@@ -426,6 +558,9 @@ class App(ctk.CTk):
 
     def actualizar_foto(self, empleado):
         print(f"📸 Actualizar foto de: {empleado['nombre']}")
+
+    def registro_facial_event(self):
+        print("Registro facial iniciado...")
 
 
 if __name__ == "__main__":

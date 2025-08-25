@@ -1,20 +1,4 @@
-#Libraries
-from tkinter import *
-import cv2
-import numpy as np
-from PIL import Image, ImageTk
-import imutils
-import mediapipe as mp
-import math
-import os
-import face_recognition as fr
-from datetime import datetime
-from tkinter import font
-import mysql.connector
-from datetime import datetime
-from tkinter import ttk
-import tkinter as tk
-from tkinter import messagebox
+j
 
 # Función para obtener los cargos
 # Cargar cargos y configurar Combobox
