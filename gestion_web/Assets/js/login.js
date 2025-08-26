@@ -23,8 +23,10 @@ function frmLogin(e) {
         http.send(new FormData(frm));
         http.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                const res = JSON.parse(this.responseText);
                 console.log(this.responseText);
+                const res = JSON.parse(this.responseText);
+                console.log(res);
+                
                 if (res == "ok") {
                         mostrarBarraProgreso();
                 } else {

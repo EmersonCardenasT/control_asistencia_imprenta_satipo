@@ -8,7 +8,7 @@ def create_connection():
             host="localhost",        # Cambia si usas otro host
             user="root",             # Tu usuario
             password="",             # Tu contraseña
-            port=3307,               # Puerto por defecto de MySQL
+            port=3308,               # Puerto por defecto de MySQL
             database="asistencia_facial_imprenta_satipo"  # Tu base de datos
         )
         if connection.is_connected():

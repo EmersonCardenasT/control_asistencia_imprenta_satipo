@@ -1,8 +1,9 @@
 <?php
-const BASE_URL = "http://localhost/python/control_asistencia_imprenta_satipo/gestion_web/";
+const BASE_URL = "http://localhost/control_asistencia_imprenta_satipo/gestion_web/";
 const host = "localhost";
 const user = "root";
 const pass = "";
+const port = 3308; // Puerto de conexión a la base de datos
 const db = "asistencia_facial_imprenta_satipo";
 const charset = "utf8"; // Solo el valor del charset
 // USUARIO ADMINISTRADOR
