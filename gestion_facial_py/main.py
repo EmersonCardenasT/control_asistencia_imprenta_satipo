@@ -45,6 +45,14 @@ def draw_elements_on_frame(frame, xi, yi, anc, alt, x1, y1, x2, y2, x3, y3, x4, 
         cv2.circle(frame, (x7, y7), 2, color, cv2.FILLED)
         cv2.circle(frame, (x8, y8), 2, color, cv2.FILLED)
 
+# Directorio raíz (carpeta padre de gestion_facial)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print("BASE_DIR:", BASE_DIR)
+# Carpeta destino para las fotos
+faces_dir = os.path.join(BASE_DIR, "gestion_web", "Assets", "img", "faces")
+
+# Crear si no existe
+os.makedirs(faces_dir, exist_ok=True)
 
 # Object Face Detect -> Detector de Rostros
 FaceObject = mp.solutions.face_detection
@@ -62,8 +70,7 @@ mpFaceMesh = mp.solutions.face_mesh
 FaceMesh = mpFaceMesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 drawSpec = mpDraw.DrawingSpec(thickness=1, circle_radius=1, color=(0,255,0))
 
-
-    
+  
 #Leer las miamgenes
 img_info = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Info.png")
 img_check = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/check.png")
@@ -79,14 +86,12 @@ class App(ctk.CTk):
     muestra = 0
     step = 0
 
-
     # Tool Drow : Herramienta de dibujo de la malla facial
     mpDraw = mp.solutions.drawing_utils
     ConfigDraw = mpDraw.DrawingSpec(thickness = 1, circle_radius = 1)
     
     #Creamos una lista de informacion: Info List
     info = []
-
 
     def __init__(self):
         super().__init__()
@@ -100,6 +105,7 @@ class App(ctk.CTk):
         y_ventana = int((self.winfo_screenheight() / 2) - (alto_ventana / 2))
         self.geometry(f"{ancho_ventana}x{alto_ventana}+{x_ventana}+{y_ventana}")
 
+        self.cap = None
 
         # --------- LOGIN FRAME ---------
         self.login_frame = ctk.CTkFrame(self, corner_radius=10)
@@ -381,8 +387,7 @@ class App(ctk.CTk):
         # Botón de Registro Facial
         btn_facial = ctk.CTkButton(
             form_frame,
-            text="" \
-            "Registro Facial",
+            text="Registro Facial",
             fg_color="#1976d2",
             hover_color="#1565c0",
             text_color="white",
@@ -496,7 +501,6 @@ class App(ctk.CTk):
         btn_cancel.pack()
 
     def confirm_logout(self):
-        import tkinter.messagebox as mbox
         respuesta = mbox.askokcancel("Cerrar Sesión", "¿Seguro que quieres cerrar sesión?")
         if respuesta:  
             self.logout()   # ✅ Aceptar → cerrar sesión
@@ -626,6 +630,47 @@ class App(ctk.CTk):
             self.conteo = 0
             self.parpadeo = False
 
+            # Recolectar todos los datos del formulario
+            self.form_data = {}
+            for key, entry in self.registro_vars.items():
+                value = entry.get().strip()
+                if key == "cargo_id":
+                    # Convertir el nombre del cargo al id
+                    value = self.cargos_dict.get(value)
+                self.form_data[key] = value
+
+            # Validación rápida
+            if not self.form_data.get("dni"):
+                mbox.showerror("Error", "El campo DNI es obligatorio")
+                return
+
+            if not self.form_data.get("nombre"):
+                mbox.showerror("Error", "El campo Nombre es obligatorio")
+                return
+            
+            if not self.form_data.get("apellido"):
+                mbox.showerror("Error", "El campo Apellido es obligatorio")
+                return
+
+            if not self.form_data.get("telefono"):
+                mbox.showerror("Error", "El campo Teléfono es obligatorio")
+                return
+
+            if not self.form_data.get("genero"):
+                mbox.showerror("Error", "El campo Género es obligatorio")
+                return
+
+            if not self.form_data.get("cargo_id"):
+                mbox.showerror("Error", "El campo Cargo es obligatorio")
+                return
+
+            if not self.form_data.get("direccion"):
+                mbox.showerror("Error", "El campo Dirección es obligatorio")
+                return
+
+            # Aquí puedes agregar más validaciones si quieres
+            print("Datos del formulario:", self.form_data)
+
             # Creamos ventana secundaria centrada
             self.top = ctk.CTkToplevel(self)
             self.top.title("Registro Facial")
@@ -653,19 +698,14 @@ class App(ctk.CTk):
             ret, frame = self.cap.read()
             if ret:
                 frameSave = frame.copy()
-
                 # Redimensionar frame
                 frame = imutils.resize(frame, width=1280)
-
                 # Conversión a RGB
                 frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
                 # Mostrar frame en formato RGB
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
                 # Procesar FaceMesh
                 res = FaceMesh.process(frameRGB)
-
                 # Variables auxiliares
                 px, py, lista = [], [], []
 
@@ -751,7 +791,7 @@ class App(ctk.CTk):
                                                     alch, anch, c = img_check.shape
                                                     #lo ubicamos en nuestro frame
                                                     frame[165:165 + alch, 1105:1105 + anch] = img_check
-                                                    
+
                                                     if longitud1 <= 15 and longitud2 <= 15 and self.parpadeo == False:
                                                         self.conteo += 1
                                                         self.parpadeo = True
@@ -765,11 +805,16 @@ class App(ctk.CTk):
                                                         if longitud1 > 26 and longitud2 > 26:
                                                             # Recortar rostro
                                                             cut = frameSave[yi:yf, xi:xf]
+                                                            # Usamos DNI como identificador único del empleado
+                                                            # Guardar la foto con nombre según DNI
+                                                            RegUser = self.form_data["dni"]
                                                             nombre_imagen = f"{RegUser}.png"
-                                                            ruta_imagen = f"../gestion_web/Assets/img/faces/{nombre_imagen}"
+                                                            ruta_imagen = os.path.join(faces_dir, nombre_imagen)
                                                             cv2.imwrite(ruta_imagen, cut)
 
-                                                            actualizar_foto_en_bd(RegUser, nombre_imagen)
+                                                            # Guardar en la BD
+                                                            self.guardar_empleado_bd(self.form_data, nombre_imagen)
+
                                                             self.step = 1
                                                 else:
                                                     self.conteo = 0
@@ -785,13 +830,43 @@ class App(ctk.CTk):
 
                 # Convertir a CTkImage
                 img = Image.fromarray(frame)
-                ctk_img = CTkImage(light_image=img, size=(640, 480))
+                ctk_img = CTkImage(light_image=img, size=(740, 580))
                 self.lblVideo.configure(image=ctk_img)
                 self.lblVideo.image = ctk_img
 
         # Loop
         self.lblVideo.after(10, self.update_video)
 
+    def guardar_empleado_bd(self, data, foto):
+        try:
+            
+            # Ejemplo con tu lógica de BD
+            conexion = create_connection()  # tu función para conectar a BD
+            cursor = conexion.cursor()
+
+            sql = """
+            INSERT INTO empleados (foto, nombre, apellido, dni, telefono, genero, fecha_nacimiento, direccion, email, cargo_id)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """
+            valores = (
+                foto,
+                data["nombre"],
+                data["apellido"],
+                data["dni"],
+                data["telefono"],
+                data["genero"],
+                data["fecha_nacimiento"],
+                data["direccion"],
+                data["email"],
+                data["cargo_id"]
+            )
+            cursor.execute(sql, valores)
+            conexion.commit()
+            conexion.close()
+            mbox.showinfo("Éxito", "Empleado registrado correctamente con foto.")
+        except Exception as e:
+            mbox.showerror("Error BD", str(e))
+            print(str(e))
 
     def on_close(self):
             if self.cap is not None:
