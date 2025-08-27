@@ -1,35 +1,3 @@
-#Libraries
-from tkinter import *
-import cv2
-import numpy as np
-from PIL import Image, ImageTk
-import imutils
-import mediapipe as mp
-import math
-import os
-import face_recognition as fr
-from datetime import datetime
-from tkinter import font
-import mysql.connector
-from datetime import datetime
-from tkinter import ttk
-import tkinter as tk
-from tkinter import messagebox
-
-# Función para obtener los cargos
-# Cargar cargos y configurar Combobox
-def configurar_combobox_cargo(combobox):
-    conexion = conectar_bd()
-    if conexion:
-        cursor = conexion.cursor()
-        cursor.execute("SELECT id, nombre FROM cargo")
-        resultados = cursor.fetchall()
-        conexion.close()
-
-        # Guardar en variable global o asociada
-        combobox.cargos = {nombre: id for id, nombre in resultados}
-        combobox['values'] = list(combobox.cargos.keys())  # Mostrar solo nombres
-
 # Función para dibujar elementos (rectángulos y círculos):
 def draw_elements_on_frame(frame, xi, yi, anc, alt, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8, color=(255, 0, 0)):
     cv2.rectangle(frame, (xi, yi, anc, alt), (255, 255, 255), 2)
@@ -41,20 +9,6 @@ def draw_elements_on_frame(frame, xi, yi, anc, alt, x1, y1, x2, y2, x3, y3, x4, 
     cv2.circle(frame, (x6, y6), 2, color, cv2.FILLED)
     cv2.circle(frame, (x7, y7), 2, color, cv2.FILLED)
     cv2.circle(frame, (x8, y8), 2, color, cv2.FILLED)
-
-#Conexion a la BD
-def conectar_bd():  
-    try:
-        conexion = mysql.connector.connect(
-            host="localhost",  # Cambia esto si usas otro host
-            user="root",  # Tu usuario de MySQL
-            password="",  # Tu contraseña de MySQL
-            database="asistencia_dreamli"
-        )
-        return conexion
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        return None
 
 def registrar_empleado_mysql(nombre, apellido, usuario, telefono, genero, fecha_nacimiento, direccion, email, cargo):
     conexion = conectar_bd()
@@ -126,7 +80,7 @@ def Close_Window():
  
 #Log Biometric Function
 def Log_Biometric():
-    #Declaramos funciones Globales1
+    #Declaramos funciones Globales
     global pantalla2, conteo, parpadeo, img_info, step, cap, lblVideo, RegUser
     
     #Verificamos si video Captura
@@ -383,12 +337,12 @@ def Log():
             print("No se pudo conectar a la base de datos")
 
 #Leer las miamgenes
-img_info = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Info.png")
-img_check = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/check.png")
-img_step0 = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Step0.png")
-img_step1 = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Step1.png")
-img_step2 = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Step2.png")
-img_liche = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/LivenessCheck.png")
+img_info = cv2.imread("C:/xampp/htdocs/python/SetUp/Info.png")
+img_check = cv2.imread("C:/xampp/htdocs/python/SetUp/check.png")
+img_step0 = cv2.imread("C:/xampp/htdocs/python/SetUp/Step0.png")
+img_step1 = cv2.imread("C:/xampp/htdocs/python/SetUp/Step1.png")
+img_step2 = cv2.imread("C:/xampp/htdocs/python/SetUp/Step2.png")
+img_liche = cv2.imread("C:/xampp/htdocs/python/SetUp/LivenessCheck.png")
 
 # Variables
 parpadeo = False
@@ -417,102 +371,3 @@ detector = FaceObject.FaceDetection(min_detection_confidence=0.5, model_selectio
 
 #Creamos una lista de informacion: Info List
 info = []
-
-#Asignar un margen para la deteccion de rostros
-
-# INTERFAZ -> Ventana principal ----INTERFAZZZZZZZ-----------
-# INTERFAZ -> Ventana principal ----
-pantalla = Tk()  # Creamos la pantalla
-pantalla.title("FACE RECOGNITION SYSTEM")  # Título
-pantalla.geometry("1280x720")  # Tamaño de la pantalla
-
-# Fondo
-imagenF = PhotoImage(file="C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/back3.png")
-background = Label(pantalla, image=imagenF)
-background.place(x=0, y=0, relwidth=1, relheight=1)  # Asegurar que cubra toda la pantalla
-
-#Profile. Fondo para perfil
-# imagenbc = PhotoImage(file="C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Back2.png")
-# Fuente personalizada
-fuente_personalizada = font.Font(family="Helvetica", size=16)
-
-# Función de validación para permitir solo letras y espacios
-def validar_entrada(texto):
-    return texto.isalpha() or texto.isspace()
-
-# Registrar la función de validación
-validacion = pantalla.register(validar_entrada)
-
-# Función de validación para números
-def validar_numeros(char):
-    return char.isdigit()
-
-# Registrar la función de validación para números
-validacion_numeros = pantalla.register(validar_numeros)
-
-# Limitar el número de caracteres
-def limitar_caracteres(entry, limite, event):
-    if len(entry.get()) > limite:
-        entry.delete(limite, END)
-
-# Primera columna: Datos personales
-Label(pantalla, text="Datos Personales", font=("Helvetica", 18, "bold"), bg="#f0f0f0").place(x=100, y=50)
-
-# Nombre
-Label(pantalla, text="Nombre:", font=fuente_personalizada).place(x=100, y=100)
-InputNameReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25, validate="key", validatecommand=(validacion, "%S"))
-InputNameReg.place(x=250, y=100)
-
-# Apellido
-Label(pantalla, text="Apellido:", font=fuente_personalizada).place(x=100, y=150)
-InputApellidoReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25, validate="key", validatecommand=(validacion, "%S"))
-InputApellidoReg.place(x=250, y=150)
-
-# Documento que viene a  ser USUARIO
-Label(pantalla, text="Documento:", font=fuente_personalizada).place(x=100, y=200)
-InputUserReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25, validate="key", validatecommand=(validacion_numeros, "%S"))
-InputUserReg.place(x=250, y=200)
-InputUserReg.bind("<KeyRelease>", lambda event: limitar_caracteres(InputUserReg, 8, event))
-
-# Teléfono
-Label(pantalla, text="Teléfono:", font=fuente_personalizada).place(x=100, y=250)
-InputTelefonoReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25, validate="key", validatecommand=(validacion_numeros, "%S"))
-InputTelefonoReg.place(x=250, y=250)
-InputTelefonoReg.bind("<KeyRelease>", lambda event: limitar_caracteres(InputTelefonoReg, 9, event))
-
-# Género
-Label(pantalla, text="Género:", font=fuente_personalizada).place(x=100, y=300)
-InputGeneroReg = ttk.Combobox(pantalla, font=fuente_personalizada, width=23, state="readonly")
-InputGeneroReg['values'] = ("Masculino", "Femenino")
-InputGeneroReg.place(x=250, y=300)
-
-# Fecha de nacimiento
-Label(pantalla, text="Fecha de Nacimiento:", font=fuente_personalizada).place(x=100, y=350)
-InputFechaNacimientoReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25)
-InputFechaNacimientoReg.place(x=250, y=350)
-
-# Dirección
-Label(pantalla, text="Dirección:", font=fuente_personalizada).place(x=100, y=400)
-InputDireccionReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25)
-InputDireccionReg.place(x=250, y=400)
-
-# Email
-Label(pantalla, text="Email:", font=fuente_personalizada).place(x=100, y=450)
-InputEmailReg = Entry(pantalla, font=fuente_personalizada, bg="white", fg="black", width=25)
-InputEmailReg.place(x=250, y=450)
-
-# Segunda columna: Datos laborales
-Label(pantalla, text="Datos Laborales", font=("Helvetica", 18, "bold"), bg="#f0f0f0").place(x=600, y=50)
-
-# Cargo
-Label(pantalla, text="Cargo:", font=fuente_personalizada).place(x=600, y=100)
-InputCargo = ttk.Combobox(pantalla, font=fuente_personalizada, width=23, state="readonly")
-InputCargo.place(x=750, y=100)
-configurar_combobox_cargo(InputCargo)
-
-# Botón de registro
-imagenBR = PhotoImage(file="C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/BtLogin.png")
-BtReg = Button(pantalla, text="Registro", image=imagenBR, height="40", width="200", command=Log)
-BtReg.place(x=750, y=200)
-
-pantalla.mainloop()

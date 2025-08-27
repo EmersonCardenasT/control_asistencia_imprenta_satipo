@@ -6,7 +6,7 @@ class Conexion
 
     public function __construct()
     {
-        $pdo = "mysql:host=" . host . ";port=". port ."; dbname=" . db . ";charset=" . charset;
+        $pdo = "mysql:host=" . host . ";port=" . port . "; dbname=" . db . ";charset=" . charset;
 
         // $pdo = "mysql:host=" . host . ";dbname=" . db . ";charset=" . charset;
 

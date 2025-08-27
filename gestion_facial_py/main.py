@@ -1,10 +1,16 @@
 import customtkinter as ctk
 import os
-from PIL import Image
+import cv2
+from PIL import Image, ImageTk
+from customtkinter import CTkImage, CTkLabel, CTkButton, CTkOptionMenu
 import tkinter.messagebox as mbox  # al inicio del archivo
 from database.connection import create_connection
 from utils.empleados_utils import obtener_empleados
 from utils.empleados_table import render_tabla_empleados
+import mediapipe as mp
+import imutils
+import face_recognition as fr
+import math
 
 # Crear conexión
 conn = create_connection()
@@ -13,7 +19,7 @@ def configurar_combobox_cargo(combobox):
     conexion = create_connection()
     if conexion:
         cursor = conexion.cursor()
-        cursor.execute("SELECT id, nombre FROM cargo")
+        cursor.execute("SELECT id, nombre FROM cargos")
         resultados = cursor.fetchall()
         conexion.close()
 
@@ -27,20 +33,64 @@ def configurar_combobox_cargo(combobox):
         return cargos_dict  # lo devolvemos para usarlo más tarde
     return {}
 
-# Ejemplo: ejecutar un query
-# if conn:
-#     cursor = conn.cursor()
-#     cursor.execute("SELECT * FROM empleados")
-#     resultados = cursor.fetchall()
-#     for fila in resultados:
-#         print(fila)
-#     cursor.close()
-#     conn.close()
+# Función para dibujar elementos (rectángulos y círculos):
+def draw_elements_on_frame(frame, xi, yi, anc, alt, x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, x6, y6, x7, y7, x8, y8, color=(255, 0, 0)):
+        cv2.rectangle(frame, (xi, yi, anc, alt), (255, 255, 255), 2)
+        cv2.circle(frame, (x1, y1), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x2, y2), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x3, y3), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x4, y4), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x5, y5), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x6, y6), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x7, y7), 2, color, cv2.FILLED)
+        cv2.circle(frame, (x8, y8), 2, color, cv2.FILLED)
 
+
+# Object Face Detect -> Detector de Rostros
+FaceObject = mp.solutions.face_detection
+detector = FaceObject.FaceDetection(min_detection_confidence=0.5, model_selection=1)
+
+# Threshold : Umbral de presision
+confThreshold = 0.5
+
+#OffSet
+offsety = 40
+offsetx = 20
+
+mpDraw = mp.solutions.drawing_utils
+mpFaceMesh = mp.solutions.face_mesh
+FaceMesh = mpFaceMesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
+drawSpec = mpDraw.DrawingSpec(thickness=1, circle_radius=1, color=(0,255,0))
+
+
+    
+#Leer las miamgenes
+img_info = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Info.png")
+img_check = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/check.png")
+img_step0 = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Step0.png")
+img_step1 = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Step1.png")
+img_step2 = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/Step2.png")
+img_liche = cv2.imread("C:/xampp/htdocs/Python/asistencia_dream_li_sac/SetUp/LivenessCheck.png")
 
 class App(ctk.CTk):
+    # Variables
+    parpadeo = False
+    conteo = 0
+    muestra = 0
+    step = 0
+
+
+    # Tool Drow : Herramienta de dibujo de la malla facial
+    mpDraw = mp.solutions.drawing_utils
+    ConfigDraw = mpDraw.DrawingSpec(thickness = 1, circle_radius = 1)
+    
+    #Creamos una lista de informacion: Info List
+    info = []
+
+
     def __init__(self):
         super().__init__()
+
 
         self.title("Sistema de Asistencia - Imprenta XYZ")
         # --- Centrar ventana ---
@@ -332,7 +382,7 @@ class App(ctk.CTk):
         btn_facial = ctk.CTkButton(
             form_frame,
             text="" \
-            " Facial",
+            "Registro Facial",
             fg_color="#1976d2",
             hover_color="#1565c0",
             text_color="white",
@@ -340,6 +390,8 @@ class App(ctk.CTk):
             command=self.registro_facial_event
         )
         btn_facial.pack(pady=30)
+        # Cámara (variable global dentro de la clase)
+        self.cap = None
         # FIN DE FRAME REGISTRO A EMPLEADO
 
         # --------- EMPLEADOS FRAME ---------
@@ -559,12 +611,197 @@ class App(ctk.CTk):
     def actualizar_foto(self, empleado):
         print(f"📸 Actualizar foto de: {empleado['nombre']}")
 
-    def registro_facial_event(self):
-        print("Registro facial iniciado...")
+    #Close window Funcions
+    def Close_Window():
+        global step, conteo
+        #Reseteamos las variblaes
+        conteo = 0
+        step = 0
+        pantalla2.destroy()
 
+    def registro_facial_event(self):
+            #Declaramos funciones Globales
+            # global pantalla2, conteo, parpadeo, img_info, step, cap, lblVideo, RegUser
+            self.step = 0
+            self.conteo = 0
+            self.parpadeo = False
+
+            # Creamos ventana secundaria centrada
+            self.top = ctk.CTkToplevel(self)
+            self.top.title("Registro Facial")
+            self.top.geometry("950x750")
+            self.top.grab_set()  # Bloquea interacción con la ventana principal
+
+            # Creamos un Frame para el video
+            video_frame = ctk.CTkFrame(self.top)
+            video_frame.pack(expand=True, fill="both", padx=5, pady=20)
+
+            # Label para mostrar video (centrado)
+            self.lblVideo = ctk.CTkLabel(video_frame, text="")
+            self.lblVideo.place(relx=0.5, rely=0.5, anchor="center")
+
+            # Abrimos la cámara
+            self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            self.cap.set(3, 640)  # Ancho
+            self.cap.set(4, 480)  # Alto
+
+            # Empezamos a mostrar video
+            self.update_video()
+
+    def update_video(self):
+        if self.cap is not None and self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if ret:
+                frameSave = frame.copy()
+
+                # Redimensionar frame
+                frame = imutils.resize(frame, width=1280)
+
+                # Conversión a RGB
+                frameRGB = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                # Mostrar frame en formato RGB
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                # Procesar FaceMesh
+                res = FaceMesh.process(frameRGB)
+
+                # Variables auxiliares
+                px, py, lista = [], [], []
+
+                if res.multi_face_landmarks:
+                    for rostros in res.multi_face_landmarks:
+                        # Dibujar malla facial
+                        mpDraw.draw_landmarks(frame, rostros, mpFaceMesh.FACEMESH_TESSELATION, drawSpec, drawSpec)
+
+                        # Extraer keypoints
+                        for id, puntos in enumerate(rostros.landmark):
+                            al, an, c = frame.shape
+                            x, y = int(puntos.x * an), int(puntos.y * al)
+                            px.append(x)
+                            py.append(y)
+                            lista.append([id, x, y])
+
+                            # Si tenemos los 468 puntos
+                            if len(lista) == 468:
+                                # Ojos
+                                x1, y1 = lista[145][1:]
+                                x2, y2 = lista[159][1:]
+                                longitud1 = math.hypot(x2-x1, y2-y1)
+
+                                x3, y3 = lista[374][1:]
+                                x4, y4 = lista[386][1:]
+                                longitud2 = math.hypot(x4-x3, y4-y3)
+
+                                # Parietales
+                                x5, y5 = lista[139][1:]
+                                x6, y6 = lista[368][1:]
+
+                                # Cejas
+                                x7, y7 = lista[70][1:]
+                                x8, y8 = lista[300][1:]
+
+                                # Detección de rostro
+                                faces = detector.process(frameRGB)
+                                if faces.detections is not None:
+                                    for faces in faces.detections:
+                                        score = faces.score[0]
+                                        bbox = faces.location_data.relative_bounding_box
+
+                                        if score > confThreshold:
+                                            xi, yi, anc, alt = int(bbox.xmin * an), int(bbox.ymin * al), int(bbox.width * an), int(bbox.height * al)
+
+                                            # Offset X
+                                            offsetan = (offsetx / 100) * anc
+                                            xi = int(xi - int(offsetan/2))
+                                            anc = int(anc + offsetan)
+                                            xf = xi + anc
+
+                                            # Offset Y
+                                            offsetal = (offsety / 100) * alt
+                                            yi = int(yi - offsetal)
+                                            alt = int(alt + offsetal)
+                                            yf = yi + alt
+
+                                            if xi < 0: xi = 0
+                                            if yi < 0: yi = 0
+                                            if anc < 0: anc = 0
+                                            if alt < 0: alt = 0
+
+                                            if self.step == 0:
+                                                cv2.rectangle(frame, (xi, yi, anc, alt), (255, 0, 255), 2)
+                                                #IMG Step0
+                                                als0, ans0, c = img_step0.shape
+                                                #lo ubicamos en nuestro frame
+                                                frame[50:50 + als0, 50:50 + ans0] = img_step0
+
+                                                #IMG Step1
+                                                als1, ans1, c = img_step1.shape
+                                                #lo ubicamos en nuestro frame
+                                                frame[50:50 + als1, 1030:1030 + ans1] = img_step1
+
+                                                #IMG Step2
+                                                als2, ans2, c = img_step2.shape
+                                                #lo ubicamos en nuestro frame
+                                                frame[270:270 + als2, 1030:1030 + ans2] = img_step2
+
+                                                # Validación de frente
+                                                if x7 > x5 and x8 < x6:
+                                                    #colocamos la imagen IMG CHECK
+                                                    alch, anch, c = img_check.shape
+                                                    #lo ubicamos en nuestro frame
+                                                    frame[165:165 + alch, 1105:1105 + anch] = img_check
+                                                    
+                                                    if longitud1 <= 15 and longitud2 <= 15 and self.parpadeo == False:
+                                                        self.conteo += 1
+                                                        self.parpadeo = True
+                                                    elif longitud1 > 15 and longitud2 > 15 and self.parpadeo == True:
+                                                        self.parpadeo = False
+
+                                                    cv2.putText(frame, f'Parpadeo: {int(self.conteo)}', (1070, 375),
+                                                                cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
+
+                                                    if self.conteo >= 3:
+                                                        if longitud1 > 26 and longitud2 > 26:
+                                                            # Recortar rostro
+                                                            cut = frameSave[yi:yf, xi:xf]
+                                                            nombre_imagen = f"{RegUser}.png"
+                                                            ruta_imagen = f"../gestion_web/Assets/img/faces/{nombre_imagen}"
+                                                            cv2.imwrite(ruta_imagen, cut)
+
+                                                            actualizar_foto_en_bd(RegUser, nombre_imagen)
+                                                            self.step = 1
+                                                else:
+                                                    self.conteo = 0
+
+                                            elif self.step == 1:
+                                                cv2.rectangle(frame, (xi, yi, anc, alt), (0, 255, 0), 2)
+
+
+                                            # Dibujar elementos auxiliares
+                                            draw_elements_on_frame(frame, xi, yi, anc, alt, x1, y1, x2, y2,
+                                                                   x3, y3, x4, y4, x5, y5, x6, y6,
+                                                                   x7, y7, x8, y8)
+
+                # Convertir a CTkImage
+                img = Image.fromarray(frame)
+                ctk_img = CTkImage(light_image=img, size=(640, 480))
+                self.lblVideo.configure(image=ctk_img)
+                self.lblVideo.image = ctk_img
+
+        # Loop
+        self.lblVideo.after(10, self.update_video)
+
+
+    def on_close(self):
+            if self.cap is not None:
+                self.cap.release()
+            self.destroy()
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("light")
     ctk.set_default_color_theme("blue")
     app = App()
+    app.protocol("WM_DELETE_WINDOW", app.on_close)
     app.mainloop()
+

@@ -3,7 +3,7 @@ const BASE_URL = "http://localhost/control_asistencia_imprenta_satipo/gestion_we
 const host = "localhost";
 const user = "root";
 const pass = "";
-const port = 3308; // Puerto de conexión a la base de datos
+const port = 3308; 
 const db = "asistencia_facial_imprenta_satipo";
 const charset = "utf8"; // Solo el valor del charset
 // USUARIO ADMINISTRADOR
