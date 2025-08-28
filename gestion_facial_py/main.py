@@ -81,7 +81,6 @@ mpFaceMesh = mp.solutions.face_mesh
 FaceMesh = mpFaceMesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 drawSpec = mpDraw.DrawingSpec(thickness=1, circle_radius=1, color=(0,255,0))
 
-
 class App(ctk.CTk):
     # Variables
     parpadeo = False
@@ -624,7 +623,7 @@ class App(ctk.CTk):
         #Reseteamos las variblaes
         conteo = 0
         step = 0
-        pantalla2.destroy()
+        # pantalla2.destroy()
 
     def registro_facial_event(self):
             #Declaramos funciones Globales
@@ -643,33 +642,33 @@ class App(ctk.CTk):
                 self.form_data[key] = value
 
             # Validación rápida
-            if not self.form_data.get("dni"):
-                mbox.showerror("Error", "El campo DNI es obligatorio")
-                return
+            # if not self.form_data.get("dni"):
+            #     mbox.showerror("Error", "El campo DNI es obligatorio")
+            #     return
 
-            if not self.form_data.get("nombre"):
-                mbox.showerror("Error", "El campo Nombre es obligatorio")
-                return
+            # if not self.form_data.get("nombre"):
+            #     mbox.showerror("Error", "El campo Nombre es obligatorio")
+            #     return
             
-            if not self.form_data.get("apellido"):
-                mbox.showerror("Error", "El campo Apellido es obligatorio")
-                return
+            # if not self.form_data.get("apellido"):
+            #     mbox.showerror("Error", "El campo Apellido es obligatorio")
+            #     return
 
-            if not self.form_data.get("telefono"):
-                mbox.showerror("Error", "El campo Teléfono es obligatorio")
-                return
+            # if not self.form_data.get("telefono"):
+            #     mbox.showerror("Error", "El campo Teléfono es obligatorio")
+            #     return
 
-            if not self.form_data.get("genero"):
-                mbox.showerror("Error", "El campo Género es obligatorio")
-                return
+            # if not self.form_data.get("genero"):
+            #     mbox.showerror("Error", "El campo Género es obligatorio")
+            #     return
 
-            if not self.form_data.get("cargo_id"):
-                mbox.showerror("Error", "El campo Cargo es obligatorio")
-                return
+            # if not self.form_data.get("cargo_id"):
+            #     mbox.showerror("Error", "El campo Cargo es obligatorio")
+            #     return
 
-            if not self.form_data.get("direccion"):
-                mbox.showerror("Error", "El campo Dirección es obligatorio")
-                return
+            # if not self.form_data.get("direccion"):
+            #     mbox.showerror("Error", "El campo Dirección es obligatorio")
+            #     return
 
             # Aquí puedes agregar más validaciones si quieres
             print("Datos del formulario:", self.form_data)
@@ -677,12 +676,12 @@ class App(ctk.CTk):
             # Creamos ventana secundaria centrada
             self.top = ctk.CTkToplevel(self)
             self.top.title("Registro Facial")
-            self.top.geometry("950x750")
+            self.top.geometry("1280x720")
             self.top.grab_set()  # Bloquea interacción con la ventana principal
 
             # Creamos un Frame para el video
             video_frame = ctk.CTkFrame(self.top)
-            video_frame.pack(expand=True, fill="both", padx=5, pady=20)
+            video_frame.pack(expand=True, fill="both")
 
             # Label para mostrar video (centrado)
             self.lblVideo = ctk.CTkLabel(video_frame, text="")
@@ -690,8 +689,8 @@ class App(ctk.CTk):
 
             # Abrimos la cámara
             self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-            self.cap.set(3, 640)  # Ancho
-            self.cap.set(4, 480)  # Alto
+            self.cap.set(3, 1280)  # Ancho
+            self.cap.set(4, 820)  # Alto
 
             # Empezamos a mostrar video
             self.update_video()
@@ -746,26 +745,30 @@ class App(ctk.CTk):
 
                                 # Detección de rostro
                                 faces = detector.process(frameRGB)
+
                                 if faces.detections is not None:
                                     for faces in faces.detections:
                                         score = faces.score[0]
                                         bbox = faces.location_data.relative_bounding_box
 
                                         if score > confThreshold:
-                                            xi, yi, anc, alt = int(bbox.xmin * an), int(bbox.ymin * al), int(bbox.width * an), int(bbox.height * al)
+                                            # Pixeles
+                                            xi, yi, anc, alt = bbox.xmin, bbox.ymin, bbox.width, bbox.height
+                                            xi, yi, anc, alt = int(xi * an), int(yi * al), int(anc * an), int(alt * al)
 
-                                            # Offset X
+                                            # offset X
                                             offsetan = (offsetx / 100) * anc
                                             xi = int(xi - int(offsetan/2))
                                             anc = int(anc + offsetan)
                                             xf = xi + anc
 
-                                            # Offset Y
+                                            # offset Y
                                             offsetal = (offsety / 100) * alt
                                             yi = int(yi - offsetal)
                                             alt = int(alt + offsetal)
                                             yf = yi + alt
 
+                                            # Si sale error : Error
                                             if xi < 0: xi = 0
                                             if yi < 0: yi = 0
                                             if anc < 0: anc = 0
@@ -798,16 +801,25 @@ class App(ctk.CTk):
                                                     if longitud1 <= 15 and longitud2 <= 15 and self.parpadeo == False:
                                                         self.conteo += 1
                                                         self.parpadeo = True
+
                                                     elif longitud1 > 15 and longitud2 > 15 and self.parpadeo == True:
                                                         self.parpadeo = False
 
                                                     cv2.putText(frame, f'Parpadeo: {int(self.conteo)}', (1070, 375),
-                                                                cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
+                                                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
 
                                                     if self.conteo >= 3:
-                                                        if longitud1 > 26 and longitud2 > 26:
+                                                        #colocamos la imagen IMG CHECK
+                                                        alch, anch, c = img_check.shape
+                                                        #lo ubicamos en nuestro frame
+                                                        frame[385:385 + alch, 1105:1105 + anch] = img_check
+
+                                                        #CUando estan abierto los ojos tomamos la foto :OPen eyes
+                                                        #Esto tambien depende de la umbral de la camara
+                                                        if longitud1 > 30 and longitud2 > 30:
                                                             # Recortar rostro
                                                             cut = frameSave[yi:yf, xi:xf]
+
                                                             # Usamos DNI como identificador único del empleado
                                                             # Guardar la foto con nombre según DNI
                                                             RegUser = self.form_data["dni"]
@@ -816,7 +828,7 @@ class App(ctk.CTk):
                                                             cv2.imwrite(ruta_imagen, cut)
 
                                                             # Guardar en la BD
-                                                            self.guardar_empleado_bd(self.form_data, nombre_imagen)
+                                                            # self.guardar_empleado_bd(self.form_data, nombre_imagen)
 
                                                             self.step = 1
                                                 else:
