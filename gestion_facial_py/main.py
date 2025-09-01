@@ -182,6 +182,11 @@ class App(ctk.CTk):
 
         # carga de imágenes
         image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_images")
+        img_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "img")
+        
+        # Logo de la empresa
+        self.company_logo = ctk.CTkImage(Image.open(os.path.join(img_path, "4305440.png")), size=(40, 40))
+        
         self.logo_image = ctk.CTkImage(Image.open(os.path.join(image_path, "CustomTkinter_logo_single.png")), size=(26, 26))
         self.large_test_image = ctk.CTkImage(Image.open(os.path.join(image_path, "large_test_image.png")), size=(500, 150))
         self.image_icon_image = ctk.CTkImage(Image.open(os.path.join(image_path, "image_icon_light.png")), size=(20, 20))
@@ -198,9 +203,19 @@ class App(ctk.CTk):
             size=(23, 23)
         )
         # --------- NAVBAR SUPERIOR ---------
-        self.navbar_frame = ctk.CTkFrame(self, height=50, corner_radius=0)
+        self.navbar_frame = ctk.CTkFrame(self, height=60, corner_radius=0)
         self.navbar_frame.grid(row=0, column=0, columnspan=2, sticky="nsew")
-        self.navbar_frame.grid_columnconfigure(0, weight=1)  # espacio flexible a la izquierda
+        self.navbar_frame.grid_columnconfigure(1, weight=1)  # espacio flexible en el medio
+
+        # Logo y título de la empresa
+        self.company_title = ctk.CTkLabel(
+            self.navbar_frame,
+            text="IMPRESIONES UNIVERSAL EIRL",
+            image=self.company_logo,
+            compound="left",
+            font=ctk.CTkFont(size=18, weight="bold")
+        )
+        self.company_title.grid(row=0, column=0, padx=20, pady=10, sticky="w")
 
         # Selector de modo claro/oscuro
         self.appearance_mode_menu = ctk.CTkOptionMenu(
@@ -208,7 +223,7 @@ class App(ctk.CTk):
             values=["Light", "Dark", "System"],
             command=self.change_appearance_mode_event
         )
-        self.appearance_mode_menu.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        self.appearance_mode_menu.grid(row=0, column=2, padx=10, pady=10, sticky="e")
 
         # Usuario logueado
         self.user_label = ctk.CTkLabel(
@@ -692,7 +707,7 @@ class App(ctk.CTk):
             self.cap.set(3, 1280)  # Ancho
             self.cap.set(4, 820)  # Alto
 
-            # Empezamos a mostrar video
+            # Empezamos a mostrar video                                         
             self.update_video()
 
     def update_video(self):
